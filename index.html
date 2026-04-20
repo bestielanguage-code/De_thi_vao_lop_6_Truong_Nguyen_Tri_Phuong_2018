@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nguyen Tri Phuong Entrance Exam Party - V4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Quicksand", sans-serif;
+        background-color: #fff1f2;
+        overflow-x: hidden;
+        touch-action: manipulation;
+      }
+      .webtoon-card {
+        border: 3px solid #000;
+        box-shadow: 6px 6px 0px #000;
+        transition: all 0.2s;
+      }
+      .webtoon-btn:active {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0px #000;
+      }
+
+      /* CSS Drawing the Table */
+      .party-table-container {
+        position: relative;
+        min-height: 450px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 40px;
+      }
+
+      .table-surface {
+        width: 90%;
+        height: 220px;
+        background: #fff;
+        border: 4px solid #000;
+        border-radius: 20px;
+        position: relative;
+        z-index: 5;
+        background-image: linear-gradient(135deg, #fff5f6 25%, transparent 25%),
+          linear-gradient(225deg, #fff5f6 25%, transparent 25%),
+          linear-gradient(45deg, #fff5f6 25%, transparent 25%),
+          linear-gradient(315deg, #fff5f6 25%, #ffffff 25%);
+        background-position: 10px 0, 10px 0, 0 0, 0 0;
+        background-size: 20px 20px;
+        background-repeat: repeat;
+        box-shadow: 10px 10px 0px rgba(244, 114, 182, 0.3);
+      }
+
+      .table-leg {
+        width: 25px;
+        height: 180px;
+        background: #ffd1dc;
+        border: 3px solid #000;
+        position: absolute;
+        z-index: 1;
+        border-radius: 0 0 10px 10px;
+      }
+
+      .leg-tl {
+        top: 180px;
+        left: 10%;
+      }
+      .leg-tr {
+        top: 180px;
+        right: 10%;
+      }
+      .leg-bl {
+        top: 200px;
+        left: 15%;
+        opacity: 0.7;
+      } /* Chân sau */
+      .leg-br {
+        top: 200px;
+        right: 15%;
+        opacity: 0.7;
+      } /* Chân sau */
+
+      .draggable {
+        position: absolute;
+        cursor: move;
+        user-select: none;
+        touch-action: none;
+        z-index: 50;
+        filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.1));
+      }
+
+      .item-controls {
+        display: none;
+        position: absolute;
+        top: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 2px solid #000;
+        border-radius: 12px;
+        padding: 4px;
+        z-index: 100;
+        box-shadow: 4px 4px 0px #000;
+      }
+      .draggable:hover .item-controls,
+      .draggable.active .item-controls {
+        display: flex;
+        gap: 6px;
+      }
+
+      .reading-passage {
+        background: #fff;
+        border: 2px solid #000;
+        padding: 15px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        max-height: 180px;
+        overflow-y: auto;
+        border-radius: 15px;
+        box-shadow: 4px 4px 0px #fce7f3;
+      }
+
+      .correct-opt {
+        background-color: #bbf7d0 !important;
+        border-color: #000 !important;
+        color: #15803d !important;
+      }
+      .wrong-opt {
+        background-color: #fecaca !important;
+        border-color: #000 !important;
+        color: #b91c1c !important;
+      }
+      .nav-dot.active {
+        background-color: #ec4899;
+        transform: scale(1.3);
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #f472b6;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen pb-10">
+    <div id="app" class="max-w-7xl mx-auto p-3 md:p-6">
+      <!-- Header -->
+      <header
+        class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white p-5 rounded-[30px] border-3 border-black shadow-[8px_8px_0px_#fbcfe8]"
+      >
+        <div>
+          <h1 class="text-3xl font-black text-pink-500 tracking-tight">
+            NT PHUONG TEA PARTY 🍰
+          </h1>
+          <p class="text-gray-500 font-bold italic">
+            Dành cho các học sinh ôn thi lớp 6
+          </p>
+        </div>
+
+        <div class="flex gap-4">
+          <div
+            class="bg-yellow-100 px-6 py-2 rounded-2xl border-3 border-black shadow-[4px_4px_0px_#000]"
+          >
+            <div class="text-[10px] uppercase font-black">Ví tiền</div>
+            <div class="text-2xl font-black text-yellow-700">
+              💰 <span id="gold-count">0</span>
+            </div>
+          </div>
+          <div
+            class="bg-blue-100 px-6 py-2 rounded-2xl border-3 border-black shadow-[4px_4px_0px_#000]"
+          >
+            <div class="text-[10px] uppercase font-black">Đúng</div>
+            <div class="text-2xl font-black text-blue-700">
+              <span id="correct-count">0</span>/25
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main id="game-container">
+        <!-- Start Screen -->
+        <div
+          id="start-screen"
+          class="webtoon-card bg-white p-12 rounded-[40px] text-center max-w-2xl mx-auto mt-20"
+        >
+          <div class="text-7xl mb-6">🍵</div>
+          <h2 class="text-4xl font-black mb-6 text-pink-500">
+            TIỆC TRÀ<br />MỪNG TÂN HỌC SINH!
+          </h2>
+          <p class="mb-10 text-gray-500 text-lg font-medium">
+            Bạn đã sẵn sàng vượt qua 25 câu hỏi để bày biện một bàn tiệc thật
+            thịnh soạn chưa?
+          </p>
+          <button
+            onclick="startGame()"
+            class="webtoon-btn bg-pink-500 text-white border-3 border-black px-12 py-5 rounded-2xl font-black text-2xl hover:bg-pink-400 uppercase tracking-wider"
+          >
+            Vào tiệc ngay!
+          </button>
+        </div>
+
+        <!-- Gameplay -->
+        <div
+          id="play-screen"
+          class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8"
+        >
+          <!-- Left: Quiz -->
+          <div class="lg:col-span-5">
+            <div
+              id="question-card"
+              class="webtoon-card bg-white p-6 rounded-[35px] sticky top-6"
+            >
+              <div class="flex justify-between items-center mb-6">
+                <span
+                  id="question-label"
+                  class="bg-black text-white px-4 py-1.5 rounded-full font-black text-xs uppercase"
+                  >CÂU 1/25</span
+                >
+                <div
+                  class="flex gap-1.5 flex-wrap justify-end max-w-[150px]"
+                  id="nav-dots"
+                ></div>
+              </div>
+
+              <div id="reading-area" class="hidden reading-passage"></div>
+
+              <div class="min-h-[80px]">
+                <h3
+                  id="question-text"
+                  class="text-xl font-black text-gray-800 leading-tight"
+                ></h3>
+              </div>
+
+              <div id="options-grid" class="grid grid-cols-1 gap-3 mt-6"></div>
+
+              <div
+                id="feedback"
+                class="mt-6 p-4 rounded-2xl hidden text-center font-black border-3 transition-all"
+              ></div>
+
+              <div
+                class="flex justify-between mt-8 pt-6 border-t-2 border-dashed border-gray-200"
+              >
+                <button
+                  onclick="prevQuestion()"
+                  id="btn-prev"
+                  class="webtoon-btn bg-gray-100 border-2 border-black px-5 py-3 rounded-xl font-bold text-gray-400"
+                >
+                  Quay lại
+                </button>
+                <button
+                  onclick="nextQuestion()"
+                  id="btn-next"
+                  class="webtoon-btn bg-pink-500 text-white border-2 border-black px-5 py-3 rounded-xl font-black"
+                >
+                  Câu tiếp
+                </button>
+                <button
+                  onclick="finishExam()"
+                  id="btn-finish"
+                  class="hidden webtoon-btn bg-green-500 text-white border-2 border-black px-5 py-3 rounded-xl font-black"
+                >
+                  NỘP BÀI ✨
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Decor Area -->
+          <div class="lg:col-span-7 space-y-8">
+            <!-- Shop -->
+            <div class="webtoon-card bg-white p-5 rounded-3xl">
+              <h3 class="font-black text-xl mb-4">
+                🛒 TIỆM ĐỒ NGỌT (20💰/MÓN)
+              </h3>
+              <div
+                id="shop-items"
+                class="flex gap-4 overflow-x-auto pb-4 px-1 scrollbar-hide"
+              ></div>
+            </div>
+
+            <!-- The Table Drawing -->
+            <div class="relative">
+              <h3 class="font-black text-xl text-pink-500 mb-4">
+                🏠 GÓC TRANG TRÍ CỦA BẠN
+              </h3>
+              <div id="party-table-area" class="party-table-container">
+                <!-- Surface of the table -->
+                <div id="table-surface" class="table-surface">
+                  <!-- Items will be placed here -->
+                </div>
+                <!-- Legs of the table -->
+                <div class="table-leg leg-bl"></div>
+                <div class="table-leg leg-br"></div>
+                <div class="table-leg leg-tl"></div>
+                <div class="table-leg leg-tr"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result-screen" class="hidden">
+          <div
+            class="webtoon-card bg-white p-16 rounded-[50px] text-center max-w-2xl mx-auto shadow-2xl mt-10"
+          >
+            <h2 class="text-4xl font-black text-blue-500 mb-2 uppercase">
+              KẾT QUẢ CỦA BẠN
+            </h2>
+            <div
+              class="text-9xl font-black text-pink-500 my-8"
+              id="final-score"
+            >
+              0/25
+            </div>
+            <p
+              id="result-msg"
+              class="text-2xl mb-12 font-bold text-gray-600"
+            ></p>
+
+            <div class="flex flex-col md:flex-row justify-center gap-6">
+              <button
+                onclick="reviewMode()"
+                class="webtoon-btn bg-blue-500 text-white border-2 border-black px-10 py-4 rounded-2xl font-black text-xl"
+              >
+                XEM LẠI BÀI
+              </button>
+              <button
+                onclick="location.reload()"
+                class="webtoon-btn bg-pink-100 border-2 border-black px-10 py-4 rounded-2xl font-black text-xl"
+              >
+                LÀM LẠI
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const questions = [
+        // I. PHONETICS
+        {
+          n: 1,
+          q: "Phát âm khác ở phần gạch chân: <br>A. an<u>s</u>wer | B. li<u>s</u>ten | C. mu<u>s</u>ic | D. <u>s</u>easide",
+          o: ["answer", "listen", "music", "seaside"],
+          a: 2,
+          hint: "Trong 'music', chữ 's' phát âm là /z/, các từ còn lại là /s/.",
+        },
+        {
+          n: 2,
+          q: "Phát âm khác ở phần gạch chân: <br>A. stopp<u>ed</u> | B. liv<u>ed</u> | C. wash<u>ed</u> | D. danc<u>ed</u>",
+          o: ["stopped", "lived", "washed", "danced"],
+          a: 1,
+          hint: "Trong 'lived', 'ed' phát âm là /d/. Các từ khác phát âm là /t/.",
+        },
+        {
+          n: 3,
+          q: "Phát âm khác ở phần gạch chân: <br>A. <u>k</u>ite | B. <u>k</u>angaroo | C. <u>k</u>now | D. <u>k</u>itchen",
+          o: ["kite", "kangaroo", "know", "kitchen"],
+          a: 2,
+          hint: "Trong 'know', chữ 'k' là âm câm.",
+        },
+        {
+          n: 4,
+          q: "Phát âm khác ở phần gạch chân: <br>A. f<u>a</u>ce | B. g<u>a</u>me | C. l<u>a</u>ke | D. cl<u>a</u>ss",
+          o: ["face", "game", "lake", "class"],
+          a: 3,
+          hint: "'Class' phát âm là /a:/ hoặc /æ/, các từ khác là /ei/.",
+        },
+        {
+          n: 5,
+          q: "Phát âm khác ở phần gạch chân: <br>A. <u>th</u>ink | B. <u>th</u>eatre | C. <u>th</u>eather | D. ear<u>th</u>",
+          o: ["think", "theatre", "weather", "earth"],
+          a: 2,
+          hint: "'Weather' phát âm là /ð/, các từ còn lại là /θ/.",
+        },
+
+        // II. READING
+        {
+          n: 6,
+          q: "Why does his grandfather give him chocolates?",
+          o: [
+            "Because John doesn't feel well.",
+            "Because they are good for his health.",
+            "Because John loves chocolates.",
+            "Because his grandfather loves chocolates.",
+          ],
+          a: 2,
+          reading: true,
+        },
+        {
+          n: 7,
+          q: "Why does John's mother let him eat chocolates when he gets them from his grandfather?",
+          o: [
+            "To make John happy.",
+            "Because she doesn't have to pay for them.",
+            "To please the grandfather.",
+            "Because John likes them a lot.",
+          ],
+          a: 2,
+          reading: true,
+        },
+        {
+          n: 8,
+          q: "What did he want when he was praying to God before his eighth birthday?",
+          o: [
+            "He wanted his grandpa to give him chocolates.",
+            "He wanted to have good luck.",
+            "He wanted God to give him chocolates.",
+            "He wanted some money to buy chocolates.",
+          ],
+          a: 2,
+          reading: true,
+        },
+        {
+          n: 9,
+          q: "Why did he shout when he was praying?",
+          o: [
+            "Because he wanted his mother to hear him.",
+            "Because his grandfather was deaf.",
+            "Because he wanted God to hear him.",
+            "Because he wanted his grandfather to hear him.",
+          ],
+          a: 3,
+          reading: true,
+        },
+        {
+          n: 10,
+          q: "Which sentence is NOT true according to the passage?",
+          o: [
+            "His mother thinks that chocolates are bad for his teeth.",
+            "His mother was in the kitchen when he was praying.",
+            "He prayed for some chocolates from his mother.",
+            "He wanted a big box of chocolates for his eighth birthday.",
+          ],
+          a: 2,
+          reading: true,
+        },
+
+        // III. USE OF ENGLISH
+        {
+          n: 11,
+          q: "There is some iced tea but there ______ any iced coffee.",
+          o: ["isn't", "are", "is", "aren't"],
+          a: 0,
+        },
+        {
+          n: 12,
+          q: "Our class ______ the Museum of History last week.",
+          o: ["visited", "looked", "went", "came"],
+          a: 0,
+        },
+        {
+          n: 13,
+          q: "My mother looks ______ in her new dress.",
+          o: ["beautify", "beautifully", "beautiful", "beauty"],
+          a: 2,
+        },
+        {
+          n: 14,
+          q: "The address is ______ the top of the page.",
+          o: ["on", "under", "in", "at"],
+          a: 3,
+        },
+        {
+          n: 15,
+          q: "Khang's favourite subject is English. He practises ______ by ______ online with his foreign friends.",
+          o: [
+            "speaking/ chatting",
+            "speak/ chatting",
+            "speaking/ to chat",
+            "to speak/ to chat",
+          ],
+          a: 0,
+        },
+        {
+          n: 16,
+          q: "We shouldn't spend too ______ time playing computer games.",
+          o: ["few", "much", "many", "some"],
+          a: 1,
+        },
+        {
+          n: 17,
+          q: "I ______ be 11 years old next week.",
+          o: ["will", "going to", "am going", "can"],
+          a: 0,
+        },
+        {
+          n: 18,
+          q: "Listen! What language ______ they ______? - I think it's French.",
+          o: ["do/ speak", "are/ speaking", "will/ speak", "did/ speak"],
+          a: 1,
+        },
+        {
+          n: 19,
+          q: "Everyone in my class ______ reading books.",
+          o: ["like", "do like", "don't like", "likes"],
+          a: 3,
+        },
+        {
+          n: 20,
+          q: "Ha speaks English ______.",
+          o: ["fluency", "fluently", "fluent", "more fluent"],
+          a: 1,
+        },
+
+        // IV. TRANSFORMATION
+        {
+          n: 21,
+          q: "What about going to Dam Sen Park?",
+          o: [
+            "Why are you going to Dam Sen Park?",
+            "When will we go to Dam Sen Park?",
+            "What do we do at Dam Sen Park?",
+            "Why don't we go to Dam Sen Park?",
+          ],
+          a: 3,
+        },
+        {
+          n: 22,
+          q: "How much are these jeans?",
+          o: [
+            "How much does that pair of jeans cost?",
+            "What is the price of these jeans?",
+            "What is the price of that pair of jeans?",
+            "How many jeans do they sell?",
+          ],
+          a: 1,
+        },
+        {
+          n: 23,
+          q: "There is a 'No camping' sign there.",
+          o: [
+            "You needn't camp there.",
+            "You can't camp there.",
+            "There is not any camp there.",
+            "It's without camping there.",
+          ],
+          a: 1,
+        },
+        {
+          n: 24,
+          q: "I spend two hours each day doing my homework.",
+          o: [
+            "It wastes me two hours each day on my homework.",
+            "It wastes us two hours each day on our homework.",
+            "It takes us two hours each day to do our homework.",
+            "It takes me two hours each day to do my homework.",
+          ],
+          a: 3,
+        },
+        {
+          n: 25,
+          q: "She always takes care of her son very well.",
+          o: [
+            "She always looks at her son carefully.",
+            "She never looks at her son carefully.",
+            "She never looks after her son very well.",
+            "She always looks after her son very well.",
+          ],
+          a: 3,
+        },
+      ];
+
+      const shopItems = [
+        { id: 1, n: "Bánh Kem", i: "🎂", p: 20 },
+        { id: 2, n: "Pizza", i: "🍕", p: 20 },
+        { id: 3, n: "Dâu Tây", i: "🍓", p: 20 },
+        { id: 4, n: "Bánh Gấu", i: "🧸", p: 20 },
+        { id: 5, n: "Trà Sữa", i: "🧋", p: 20 },
+        { id: 6, n: "Hoa Hồng", i: "🌹", p: 20 },
+        { id: 7, n: "Donut", i: "🍩", p: 20 },
+        { id: 8, n: "Mèo Béo", i: "🐱", p: 20 },
+        { id: 9, n: "Sushi", i: "🍣", p: 20 },
+        { id: 10, n: "Nước Cam", i: "🍹", p: 20 },
+        { id: 11, n: "Hamburger", i: "🍔", p: 20 },
+        { id: 12, n: "Quà Tặng", i: "🎁", p: 20 },
+      ];
+
+      const readingText = `John is a nice boy. He likes chocolates very much. However, his mother never gives him any because she thinks they are bad for his teeth. His grandfather loves him very much. He sometimes buys John some when he comes to see his grandson. Then his mother lets him eat them because she wants to make the grandpa happy.<br><br>One evening, a few days before John's eighth birthday, he was saying his prayers in his bedroom. "Please, God", he shouted, "make my friends give me a big box of chocolates for my birthday on Saturday". His mother was in the kitchen and she heard the small boy shouting and went into his bedroom quickly.<br><br>"Why are you shouting, John?" she asked her son, "God can hear when you talk quietly". "I know", answered the clever boy with a smile, "but Grandfather's in the next room, and he can't".`;
+
+      let currentIdx = 0;
+      let gold = 0;
+      let correctCount = 0;
+      let userChoices = Array(25).fill(null);
+      let isReviewMode = false;
+
+      function startGame() {
+        currentIdx = 0;
+        gold = 0;
+        correctCount = 0;
+        userChoices.fill(null);
+        isReviewMode = false;
+        showScreen("play-screen");
+        updateUI();
+        renderShop();
+        renderDots();
+      }
+
+      function updateUI() {
+        const q = questions[currentIdx];
+        document.getElementById("gold-count").innerText = gold;
+        document.getElementById("correct-count").innerText = correctCount;
+        document.getElementById("question-label").innerText = `CÂU ${q.n}/25`;
+        document.getElementById("question-text").innerHTML = q.q;
+
+        const readArea = document.getElementById("reading-area");
+        if (q.reading) {
+          readArea.innerHTML = readingText;
+          readArea.classList.remove("hidden");
+        } else {
+          readArea.classList.add("hidden");
+        }
+
+        const grid = document.getElementById("options-grid");
+        grid.innerHTML = "";
+        q.o.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.className = `webtoon-btn p-4 rounded-2xl text-left border-3 border-black font-black transition-all bg-white hover:bg-pink-50`;
+          btn.innerText = opt;
+
+          if (userChoices[currentIdx] !== null) {
+            if (i === q.a) btn.classList.add("correct-opt");
+            else if (i === userChoices[currentIdx])
+              btn.classList.add("wrong-opt");
+            btn.disabled = true;
+          } else {
+            btn.onclick = () => selectOption(i);
+          }
+          grid.appendChild(btn);
+        });
+
+        const feedback = document.getElementById("feedback");
+        if (userChoices[currentIdx] !== null) {
+          feedback.classList.remove("hidden");
+          const isCorrect = userChoices[currentIdx] === q.a;
+          feedback.innerHTML = isCorrect
+            ? "✨ GIỎI QUÁ! +20💰"
+            : `🌸 TIẾC QUÁ! Đáp án là: ${q.o[q.a]}`;
+          feedback.className = `mt-6 p-4 rounded-2xl text-center font-black border-3 ${
+            isCorrect
+              ? "bg-green-50 border-green-500 text-green-700"
+              : "bg-red-50 border-red-500 text-red-700"
+          }`;
+        } else {
+          feedback.classList.add("hidden");
+        }
+
+        document.getElementById("btn-prev").disabled = currentIdx === 0;
+        document
+          .getElementById("btn-prev")
+          .classList.toggle("text-gray-300", currentIdx === 0);
+
+        const isLast = currentIdx === questions.length - 1;
+        document.getElementById("btn-next").classList.toggle("hidden", isLast);
+        document
+          .getElementById("btn-finish")
+          .classList.toggle("hidden", !isLast || isReviewMode);
+
+        updateDots();
+      }
+
+      function renderDots() {
+        const container = document.getElementById("nav-dots");
+        container.innerHTML = "";
+        questions.forEach((_, i) => {
+          const dot = document.createElement("div");
+          dot.className = `nav-dot w-2 h-2 rounded-full border border-black/20 cursor-pointer bg-gray-200 transition-all`;
+          dot.onclick = () => {
+            currentIdx = i;
+            updateUI();
+          };
+          container.appendChild(dot);
+        });
+      }
+
+      function updateDots() {
+        const dots = document.getElementById("nav-dots").children;
+        Array.from(dots).forEach((dot, i) => {
+          dot.classList.toggle("active", i === currentIdx);
+          if (userChoices[i] !== null) {
+            dot.style.backgroundColor =
+              userChoices[i] === questions[i].a ? "#22c55e" : "#ef4444";
+            dot.style.border = "1px solid #000";
+          }
+        });
+      }
+
+      function selectOption(i) {
+        if (isReviewMode) return;
+        userChoices[currentIdx] = i;
+        if (i === questions[currentIdx].a) {
+          correctCount++;
+          gold += 20;
+        }
+        updateUI();
+        renderShop();
+      }
+
+      function nextQuestion() {
+        if (currentIdx < questions.length - 1) {
+          currentIdx++;
+          updateUI();
+        }
+      }
+
+      function prevQuestion() {
+        if (currentIdx > 0) {
+          currentIdx--;
+          updateUI();
+        }
+      }
+
+      function renderShop() {
+        const shop = document.getElementById("shop-items");
+        shop.innerHTML = "";
+        shopItems.forEach((item) => {
+          const canBuy = gold >= item.p;
+          const card = document.createElement("div");
+          card.className = `min-w-[90px] p-2 border-2 border-black rounded-2xl text-center transition-all bg-white relative ${
+            canBuy
+              ? "cursor-pointer hover:bg-yellow-50 hover:-translate-y-1"
+              : "opacity-40 grayscale"
+          }`;
+          card.innerHTML = `
+                    <div class="text-4xl mb-1">${item.i}</div>
+                    <div class="text-[9px] font-black uppercase leading-tight mb-1 h-6 flex items-center justify-center">${item.n}</div>
+                    <div class="text-[10px] font-black text-pink-500 bg-pink-50 px-2 py-0.5 rounded-full border border-pink-200">${item.p}💰</div>
+                `;
+          if (canBuy) card.onclick = () => buyItem(item);
+          shop.appendChild(card);
+        });
+      }
+
+      function buyItem(item) {
+        gold -= item.p;
+        document.getElementById("gold-count").innerText = gold;
+        renderShop();
+
+        const tableSurface = document.getElementById("table-surface");
+        const el = document.createElement("div");
+        el.className = "draggable p-2 select-none active";
+        // Randomly place within the table surface area
+        el.style.left = Math.random() * 70 + 10 + "%";
+        el.style.top = Math.random() * 50 + 10 + "%";
+        el.style.fontSize = "60px";
+        el.innerHTML = `
+                <div class="item-controls">
+                    <button class="bg-blue-400 text-white w-8 h-8 rounded-full flex items-center justify-center font-black border border-black" onclick="resize(this, 1.2)">+</button>
+                    <button class="bg-pink-400 text-white w-8 h-8 rounded-full flex items-center justify-center font-black border border-black" onclick="resize(this, 0.8)">-</button>
+                    <button class="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center font-black" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+                <span>${item.i}</span>
+            `;
+        tableSurface.appendChild(el);
+        makeDraggable(el);
+      }
+
+      function resize(btn, factor) {
+        const el = btn.parentElement.parentElement;
+        const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+        el.style.fontSize = currentSize * factor + "px";
+      }
+
+      function makeDraggable(el) {
+        let p1 = 0,
+          p2 = 0,
+          p3 = 0,
+          p4 = 0;
+        el.onmousedown = dragStart;
+        el.ontouchstart = dragStart;
+
+        function dragStart(e) {
+          if (e.target.tagName === "BUTTON") return;
+          e.preventDefault();
+          p3 = e.clientX || e.touches[0].clientX;
+          p4 = e.clientY || e.touches[0].clientY;
+          document.onmouseup = dragEnd;
+          document.onmousemove = dragMove;
+          document.ontouchend = dragEnd;
+          document.ontouchmove = dragMove;
+
+          document
+            .querySelectorAll(".draggable")
+            .forEach((d) => d.classList.remove("active"));
+          el.classList.add("active");
+        }
+
+        function dragMove(e) {
+          const cx = e.clientX || e.touches[0].clientX;
+          const cy = e.clientY || e.touches[0].clientY;
+          p1 = p3 - cx;
+          p2 = p4 - cy;
+          p3 = cx;
+          p4 = cy;
+
+          const surface = document.getElementById("table-surface");
+          let nTop = el.offsetTop - p2;
+          let nLeft = el.offsetLeft - p1;
+
+          // Restrict within the table surface
+          if (nTop > -20 && nTop < surface.offsetHeight - 50)
+            el.style.top = nTop + "px";
+          if (nLeft > -20 && nLeft < surface.offsetWidth - 50)
+            el.style.left = nLeft + "px";
+        }
+
+        function dragEnd() {
+          document.onmouseup = null;
+          document.onmousemove = null;
+          document.ontouchend = null;
+          document.ontouchmove = null;
+        }
+      }
+
+      function finishExam() {
+        showScreen("result-screen");
+        document.getElementById("final-score").innerText = `${correctCount}/25`;
+        let msg = "";
+        if (correctCount === 25)
+          msg = "SIÊU THỦ KHOA! Một bữa tiệc hoàn hảo cho bộ óc thiên tài!";
+        else if (correctCount >= 20)
+          msg =
+            "TUYỆT VỜI! Bạn đã sẵn sàng chinh phục trường Nguyễn Tri Phương rồi.";
+        else
+          msg = "CỐ GẮNG LÊN! Hãy cùng xem lại bài để giỏi hơn mỗi ngày nhé.";
+        document.getElementById("result-msg").innerText = msg;
+      }
+
+      function reviewMode() {
+        isReviewMode = true;
+        currentIdx = 0;
+        showScreen("play-screen");
+        updateUI();
+      }
+
+      function showScreen(id) {
+        ["start-screen", "play-screen", "result-screen"].forEach((s) => {
+          document.getElementById(s).classList.add("hidden");
+        });
+        document.getElementById(id).classList.remove("hidden");
+      }
+    </script>
+  </body>
+</html>
